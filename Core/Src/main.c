@@ -45,14 +45,14 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+static  int32_t  tim2_period_elapsed = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MPU_Config(void);
 /* USER CODE BEGIN PFP */
-
+static  void  period_elapsed( void );
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -116,6 +116,7 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
     MX_LWIP_Process();
+    period_elapsed();
   }
   /* USER CODE END 3 */
 }
@@ -184,13 +185,34 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+/**
+ *   \brief   Функция обратного вызова таймера
+ *   \param  *htim
+ *   \return  Нет
+ */
+void  HAL_TIM_PeriodElapsedCallback( TIM_HandleTypeDef  * htim )
+{
+	if ( htim->Instance == TIM2 )
+	{
+		tim2_period_elapsed = 1;
+	}
+}
+
+
+/**
+ *   \brief   Обработчик по флагу таймера
+ *   \param   Нет
+ *   \return  Нет
+ */
+static  void  period_elapsed( void )
 {
 	err_t  err = ERR_OK;
 
 
-	if ( htim->Instance == TIM2 )
+	if ( tim2_period_elapsed )
 	{
+		tim2_period_elapsed = 0;
+
 		err = udp_client_send();
 
         if ( ERR_OK == err )
@@ -204,14 +226,14 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
         }
         else
         {
-        	HAL_GPIO_TogglePin( GPIOB, RED_LED_Pin );
+    	    HAL_GPIO_TogglePin( GPIOB, RED_LED_Pin );
 
             if ( HAL_GPIO_ReadPin( GPIOB, BLUE_LED_Pin ) == GPIO_PIN_SET )
             {
-        	    HAL_GPIO_WritePin( GPIOB, BLUE_LED_Pin, GPIO_PIN_RESET );
-        	}
+    	        HAL_GPIO_WritePin( GPIOB, BLUE_LED_Pin, GPIO_PIN_RESET );
+    	    }
         }
-	}
+    }
 }
 /* USER CODE END 4 */
 
