@@ -186,7 +186,7 @@ void SystemClock_Config(void)
 
 /* USER CODE BEGIN 4 */
 /**
- *   \brief
+ *   \brief   Функция обратного вызова таймера
  *   \param  *htim
  *   \return  Нет
  */
